@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000c\u0000a\u0000p\u0000s\u0000t\u0000o\u0000n\u0000e\u0000B\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000A\u0000p\u0000p\u0000:\u0000 \u0000h\u0000e\u0000r\u0000e\u0000M\u0000e\u0000d\u0000s\u0000\r\u0000 \u0000B\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garcia-christian/capstoneBackend.git"
+  },
+  "author": "tianey",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/garcia-christian/capstoneBackend/issues"
+  },
+  "homepage": "https://github.com/garcia-christian/capstoneBackend#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "nodemon": "^2.0.19",
+    "pg": "^8.7.3",
+    "react-router-dom": "^5.2.0",
+    "ts-token-generator": "^1.0.4"
+  }
+}
