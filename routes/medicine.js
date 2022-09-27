@@ -90,13 +90,14 @@ router.put("/deduct-qty", async (req, res) => {
     try {
         const { id } = req.body;
         const { qty } = req.body;
+        const { pharmacy } = req.body; 
 
 
 
         const sql = `UPDATE public.tbl_local_medicine
-        SET med_qty= coalesce(med_qty, 0) - $2
-        WHERE med_id = $1;`;
-        const rs = await pool.query(sql, [id,qty]);
+        SET med_qty= coalesce(med_qty, 0) - $3
+        WHERE pharmacy_id = $2 AND   med_id = $1 `;
+        const rs = await pool.query(sql, [id,pharmacy,qty]);
 
         res.json(rs)
         console.log(rs.rows);

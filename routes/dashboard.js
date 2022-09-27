@@ -32,7 +32,7 @@ router.get("/get-pharma-admin/:id", async (req, res) => {
     } catch (err) {
         console.error(err.message+"5");
     } 
-
+   
 });
 router.get("/get-pharma/:id", async (req, res) => {
    

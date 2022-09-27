@@ -93,7 +93,7 @@ router.post("/add-suppliers", async (req, res) => {
          const rs = await pool.query(purchase, [company_name,contact,email,address, pharmacy]);
 
         res.json(rs)
-        console.log(rs);
+        console.log(rs); 
     } catch (err) {
         console.error(err.message);
     } 
