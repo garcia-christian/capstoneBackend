@@ -28,7 +28,7 @@ router.get("/get-pharma-admin/:id", async (req, res) => {
         where admin_id = $1;`;
         const rs = await pool.query(sql,[req.params.id]);
         res.json(rs.rows)
-        console.log(rs.rows);
+        console.log(rs.rows); 
     } catch (err) {
         console.error(err.message+"5");
     } 
