@@ -11,13 +11,14 @@ app.use(express.urlencoded({ extended: true }))
 
 
 //Routes
-app.use("/auth",require("./routes/auth"));
-app.use("/dashboard",require("./routes/dashboard"));
-app.use("/medicine",require("./routes/medicine"));
-app.use("/sell",require("./routes/sell"));
-app.use("/purchase",require("./routes/purchase"));
-
-
+app.use("/auth", require("./routes/auth"));
+app.use("/dashboard", require("./routes/dashboard"));
+app.use("/medicine", require("./routes/medicine"));
+app.use("/sell", require("./routes/sell"));
+app.use("/purchase", require("./routes/purchase"));
+app.use("/reminders", require("./routes/reminders"));
+app.use("/images", require("./routes/images"));
+app.use("/mobileshop", require("./routes/mobileshop"));
 
 
 
@@ -32,7 +33,7 @@ app.get("/getpharma", async (req, res) => {
     try {
         const sql = `SELECT *
         FROM public.tbl_pharmacy;`;
-        const rs = await pool.query(sql); 
+        const rs = await pool.query(sql);
         res.json(rs.rows)
     } catch (err) {
         console.error(err.message);
@@ -46,23 +47,23 @@ app.post("/addpharma", async (req, res) => {
         const { name } = req.body;
         const { location } = req.body;
         const { admin } = req.body;
-        
+
         const sql1 = `INSERT INTO public.tbl_pharmacy(
             pharmacy_name, pharmacy_location)
             VALUES ($1, $2) returning *`;
-         const rs1 = await pool.query(sql1, [name,location]);
+        const rs1 = await pool.query(sql1, [name, location]);
 
 
-         const sql = `INSERT INTO public."tbl_pharmaAdmin"(
+        const sql = `INSERT INTO public."tbl_pharmaAdmin"(
              pharmacy_id, admin_id)
              VALUES ($1, $2) returning *`;
-          const rs = await pool.query(sql, [rs1.rows[0].pharmacy_id,admin]);
+        const rs = await pool.query(sql, [rs1.rows[0].pharmacy_id, admin]);
 
         res.json(rs)
     } catch (err) {
         console.error(err.message);
     }
-  
+
 });
 //getadmin
 app.get("/getadmin", async (req, res) => {
@@ -70,7 +71,7 @@ app.get("/getadmin", async (req, res) => {
     try {
         const sql = `SELECT *
         FROM public.tbl_administrator;`;
-        const rs = await pool.query(sql); 
+        const rs = await pool.query(sql);
         res.json(rs.rows)
     } catch (err) {
         console.error(err.message);
@@ -84,35 +85,35 @@ app.post("/addadmin", async (req, res) => {
         const { name } = req.body;
         const { username } = req.body;
         const { password } = req.body;
-      
-       
+
+
         const sql = `INSERT INTO public.tbl_administrator(
              admin_name, admin_username, admin_password)
             VALUES ( $1, $2, $3) returning *`;
-         const rs = await pool.query(sql, [name,username,password]);
+        const rs = await pool.query(sql, [name, username, password]);
 
         res.json(rs)
     } catch (err) {
         console.error(err.message);
     }
- 
+
 });
 app.post("/assignAdmin", async (req, res) => {
 
     try {
         const { pharma } = req.body;
         const { admin } = req.body;
-     
+
         const sql = `INSERT INTO public."tbl_pharmaAdmin"(
             pharmacy_id, admin_id)
             VALUES ($1, $2) returning *`;
-         const rs = await pool.query(sql, [pharma,admin]);
+        const rs = await pool.query(sql, [pharma, admin]);
 
         res.json(rs)
     } catch (err) {
         console.error(err.message);
     }
- 
+
 });
 
 

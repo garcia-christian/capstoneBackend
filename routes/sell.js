@@ -33,11 +33,12 @@ router.post("/save", async (req, res) => {
         const { sales_id } = req.body;
         const { qty_purchased } = req.body;
         const { total_price } = req.body;
+        const { med } = req.body;
 
         const sales = `INSERT INTO public."tbl_onSalesInvoice"(
-             sales_id, qty_purchased, total_price)
-            VALUES ($1, $2, $3) returning *`;
-        const rs = await pool.query(sales, [sales_id, qty_purchased, total_price]);
+             sales_id, qty_purchased, total_price, med_id)
+            VALUES ($1, $2, $3, $4) returning *`;
+        const rs = await pool.query(sales, [sales_id, qty_purchased, total_price, med]);
 
         res.json(rs)
         console.log(rs);
