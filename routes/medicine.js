@@ -116,8 +116,8 @@ router.post("/add-local", async (req, res) => {
         const { price } = req.body;
         const { storage } = req.body;
         const { notes } = req.body;
-
-        const duplicate = await pool.query(`select * from tbl_local_medicine where global_med_id = $1 and pharmacy_id = $2`, [global_med,pharmacy]);
+        const { threshold } = req.body;
+        const duplicate = await pool.query(`select * from tbl_local_medicine where global_med_id = $1 and pharmacy_id = $2`, [global_med, pharmacy]);
 
         if (duplicate.rows.length !== 0) {
             return res.status(401).json("Medicine already added")
@@ -125,9 +125,9 @@ router.post("/add-local", async (req, res) => {
 
 
         const sql = `INSERT INTO public.tbl_local_medicine(
-            pharmacy_id, global_med_id, med_price, med_storage, med_notes, med_qty)
-            VALUES ($1, $2, $3, $4, $5, 0) returning *`;
-        const rs = await pool.query(sql, [pharmacy, global_med, price, storage, notes]);
+            pharmacy_id, global_med_id, med_price, med_storage, med_notes, med_qty, warning_threshold)
+            VALUES ($1, $2, $3, $4, $5, 0, $6) returning *`;
+        const rs = await pool.query(sql, [pharmacy, global_med, price, storage, notes, threshold]);
 
         res.json(rs)
         console.log(rs.rows);
@@ -184,7 +184,7 @@ router.get("/get-stock/:id", async (req, res) => {
 router.get("/get-local-med/:id", async (req, res) => {
 
     try {
-        const sql = `SELECT m.med_id,  g.global_generic_name, c.med_cat_desc, g.global_brand_name, m.med_price, m.med_qty 
+        const sql = `SELECT g.global_generic_name, c.med_cat_desc, g.global_brand_name, m.*
         FROM public.tbl_local_medicine m
         LEFT OUTER JOIN tbl_global_med g  ON g.global_med_id = m.global_med_id
         LEFT OUTER JOIN tbl_med_category c  ON g.global_med_category = c.med_cat_id
@@ -247,6 +247,90 @@ router.get("/get-global-med/:word", async (req, res) => {
         const rs = await pool.query(sql);
         res.json(rs.rows)
         console.log(rs.rows);
+    } catch (err) {
+        console.error(err.message);
+    }
+
+});
+
+router.put("/edit-medicine/", async (req, res) => {
+    const { id } = req.body;
+    const { price } = req.body;
+    const { storage } = req.body;
+    const { notes } = req.body;
+    const { threshold } = req.body;
+    try {
+
+        const sql = `UPDATE public.tbl_local_medicine
+        SET  med_price=$1, med_storage=$2, med_notes=$3, warning_threshold=$5
+        WHERE med_id=$4;`;
+
+        const rs = await pool.query(sql, [price, storage, notes, id, threshold]);
+        res.json(rs)
+
+    } catch (error) {
+        console.error(error.message)
+        res.status(500).json("Server Error")
+    }
+
+})
+router.get("/get-medicine-stock-status/:id", async (req, res) => {
+
+    try {
+        const sql = `SELECT g.global_generic_name, c.med_cat_desc, g.global_brand_name, m.*
+        FROM public.tbl_local_medicine m
+        LEFT OUTER JOIN tbl_global_med g  ON g.global_med_id = m.global_med_id
+        LEFT OUTER JOIN tbl_med_category c  ON g.global_med_category = c.med_cat_id
+        WHERE m.pharmacy_id = $1 and m.med_qty <= coalesce(m.warning_threshold,0)
+        order by m.med_qty desc;`;
+        const rs = await pool.query(sql, [req.params.id]);
+        res.json(rs.rows)
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+router.post("/add-missing-med/", async (req, res) => {
+
+    const { med_id, qty, price, pharma } = req.body;
+    try {
+        const sql = `INSERT INTO public.tbl_missing_med(
+            med_id, quantity, current_item_price, report_date, pharma_id)
+               VALUES ( $1, $2, $3, CURRENT_TIMESTAMP, $4);`;
+        const sql2 = `UPDATE public.tbl_local_medicine
+               SET med_qty= coalesce(med_qty, 0) - $3
+               WHERE pharmacy_id = $2 AND   med_id = $1 `;
+        const rs2 = await pool.query(sql2, [med_id, pharma, qty]);
+        const rs = await pool.query(sql, [med_id, qty, price, pharma]);
+        res.json(rs.rows)
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+router.get("/get-missing-medicine/:id", async (req, res) => {
+
+    try {
+        const sql = `SELECT missing_id, m.med_id, g.global_generic_name, g.global_brand_name,  quantity, current_item_price, report_date, pharma_id
+        FROM public.tbl_missing_med m
+        LEFT OUTER JOIN tbl_local_medicine a  ON a.med_id = m.med_id
+        LEFT OUTER JOIN tbl_global_med g  ON g.global_med_id = a.global_med_id
+        where m.pharma_id = $1 ;`;
+        const rs = await pool.query(sql, [req.params.id]);
+        res.json(rs.rows)
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+router.get("/get-local-available-med/:id", async (req, res) => {
+
+    try {
+        const sql = `SELECT g.global_generic_name, c.med_cat_desc, g.global_brand_name, m.*
+        FROM public.tbl_local_medicine m
+        LEFT OUTER JOIN tbl_global_med g  ON g.global_med_id = m.global_med_id
+        LEFT OUTER JOIN tbl_med_category c  ON g.global_med_category = c.med_cat_id
+        WHERE m.pharmacy_id = $1 and m.med_qty>0;
+        `;
+        const rs = await pool.query(sql, [req.params.id]);
+        res.json(rs.rows)
     } catch (err) {
         console.error(err.message);
     }

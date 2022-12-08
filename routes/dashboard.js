@@ -23,15 +23,15 @@ router.get("/get-pharma-admin/:id", async (req, res) => {
  
 
     try {
-        const sql = `SELECT  pharmacy_id
+        const sql = `SELECT  *
         FROM public."tbl_pharmaAdmin"
         where admin_id = $1;`;
         const rs = await pool.query(sql,[req.params.id]);
-        res.json(rs.rows)
+        res.json(rs.rows[0])
         console.log(rs.rows); 
     } catch (err) {
         console.error(err.message+"5");
-    } 
+    }  
    
 });
 router.get("/get-pharma/:id", async (req, res) => {

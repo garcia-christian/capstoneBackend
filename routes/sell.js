@@ -59,15 +59,61 @@ router.get("/discount/:id", async (req, res) => {
     }
 
 });
-router.get("/this-month-report/:id", async (req, res) => {
+router.get("/month-report/:id", async (req, res) => {
 
     try {
-        const sql = `select extract( month from date_trunc('month', "Date")) as month, sum(total_price) as revenue
+        const sql = `select  extract( year from date_trunc('year', "Date")) as year, extract( month from date_trunc('month', "Date")) as month, count(salesinvoice_id) as transactions , sum(total_price) as revenue
         FROM public.tbl_sales_invoice
         where pharmacy_id = $1
-        group by date_trunc('month', "Date")
+        group by date_trunc('month', "Date"),
+        year
         order by month desc
         ;`;
+        const rs = await pool.query(sql, [req.params.id]);
+        var months = [];
+        const moment = require('moment');
+        moment.locale('en');
+        var year = moment().format('YYYY')
+        moment.months().map((value, index) => {
+            let cnt = 0
+            rs.rows.map((data) => {
+                if (data.month == index + 1 && data.year == year) {
+                    months.push({
+                        month: index + 1,
+                        monthlong: value,
+                        revenue: data.revenue,
+                        transactions: data.transactions
+                    })
+                    cnt++
+                }
+            })
+            if (cnt == 0) {
+                months.push({
+                    month: index + 1,
+                    monthlong: value,
+                    revenue: 0,
+                    transactions: 0
+                })
+            }
+
+        });
+
+
+        res.json(months)
+    } catch (err) {
+        console.error(err.message);
+    }
+
+});
+
+router.get("/this-year-report/:id", async (req, res) => {
+
+    try {
+        const sql = `select extract( year from date_trunc('year', "Date")) as year, sum(total_price) as revenue
+        FROM public.tbl_sales_invoice
+        where pharmacy_id = $1
+        group by date_trunc('year', "Date")
+        order by year desc  ;`;
         const rs = await pool.query(sql, [req.params.id]);
         res.json(rs.rows)
     } catch (err) {
@@ -139,7 +185,33 @@ router.post("/add-discount", async (req, res) => {
 
 })
 
+router.get("/get-sales-meds/:id", async (req, res) => {
 
+    try {
+        const sql = `SELECT m.med_id, g.global_brand_name,g.global_generic_name, c.med_cat_desc, sum(coalesce(s.qty_purchased,0)) as purchased, sum(coalesce(s.total_price,0)) as revenue
+        FROM public.tbl_local_medicine m
+        LEFT OUTER JOIN
+            tbl_global_med g  ON g.global_med_id = m.global_med_id
+        LEFT OUTER JOIN
+            "tbl_onSalesInvoice" s  ON s.med_id = m.med_id
+        LEFT OUTER JOIN
+            tbl_med_category c  ON g.global_med_category = c.med_cat_id
+        where m.pharmacy_id= $1
+        group by
+            m.med_id,
+            c.med_cat_desc,
+            g.global_generic_name,
+            g.global_brand_name
+        order by
+            revenue desc`
+            ;
+        const rs = await pool.query(sql, [req.params.id]);
+        res.json(rs.rows)
+    } catch (err) {
+        console.error(err.message);
+    }
+
+});
 
 
 
