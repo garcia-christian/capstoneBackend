@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
         const { total_price } = req.body;//fix
         const { discount } = req.body;
         const { payed_ammount } = req.body;
-        const { change } = req.body;
+        const { change } = req.body; 
         const { payment_type } = req.body;
 
         const sales = `INSERT INTO public.tbl_sales_invoice(

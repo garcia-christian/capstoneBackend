@@ -32,7 +32,7 @@ router.post("/register", validator, async (req, res) => {
 
         // check
 
-        const user = await pool.query(`select * from tbl_administrator where admin_email = $1`, [email]);
+        const user = await pool.query(`select * from public.tbl_administrator where admin_email = $1`, [email]);
 
         if (user.rows.length !== 0) {
             return res.status(401).json("Admin already exist")
@@ -81,7 +81,7 @@ router.post("/login", validator, async (req, res) => {
         const { email, password } = req.body;
 
         //check if exist
-        const user = await pool.query(`select * from tbl_administrator where admin_email = $1`, [email])
+        const user = await pool.query(`select * from public.tbl_administrator where admin_email = $1`, [email])
 
         if (user.rows.length === 0) {
             return res.status(401).json("User Not found");
@@ -136,7 +136,7 @@ router.post("/token", async (req, res) => {
     if (!reftoken) {
         return res.status(401).json("Invalid Token");
     }
-    const tokens = await pool.query(`select * from tbl_tokens where token = $1`, [reftoken])
+    const tokens = await pool.query(`select * from public.tbl_tokens where token = $1`, [reftoken])
   
    if(tokens.rowCount === 0){
     return res.status(401).json("User Not found");
