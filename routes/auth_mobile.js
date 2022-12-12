@@ -23,7 +23,7 @@ function toDateTime(secs) {
 }
 
 //reg
-router.post("/register", validator, async (req, res) => {
+router.post("/registerm", validator, async (req, res) => {
 
     try {
 

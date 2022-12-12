@@ -149,7 +149,7 @@ router.post("/register-staff", validator, async (req, res) => {
 
         // check
 
-        const user = await pool.query(`select * from tbl_administrator where admin_email = $1`, [email]);
+        const user = await pool.query(`select * from public.tbl_administrator where admin_email = $1`, [email]);
 
 
         if (user.rows.length !== 0) {
@@ -269,7 +269,7 @@ router.put("/edit-pharma-timelimit/", async (req, res) => {
         res.json(rs)
 
     } catch (error) {
-        console.error(error.message)    
+        console.error(error.message)
         res.status(500).json("Server Error")
     }
 
