@@ -153,7 +153,7 @@ router.post("/token", async (req, res) => {
     if (!reftoken) {
         return res.status(401).json("Invalid Token");
     }
-    const tokens = await pool.query(`select * from tbl_tokens where token = $1`, [reftoken])
+    const tokens = await pool.query(`select * from public.tbl_tokens where token = $1`, [reftoken])
 
     if (tokens.rowCount === 0) {
         return res.status(401).json("User Not found");
