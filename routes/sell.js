@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
         const { total_price } = req.body;//fix
         const { discount } = req.body;
         const { payed_ammount } = req.body;
-        const { change } = req.body; 
+        const { change } = req.body;
         const { payment_type } = req.body;
 
         const sales = `INSERT INTO public.tbl_sales_invoice(
@@ -64,7 +64,7 @@ router.get("/month-report/:id", async (req, res) => {
     try {
         const sql = `select  extract( year from date_trunc('year', "Date")) as year, extract( month from date_trunc('month', "Date")) as month, count(salesinvoice_id) as transactions , sum(total_price) as revenue
         FROM public.tbl_sales_invoice s
-        where pharmacy_id = 12
+        where pharmacy_id = $1
         group by date_trunc('month', "Date"),
         year
         order by month desc
