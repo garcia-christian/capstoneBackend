@@ -63,7 +63,7 @@ router.get("/month-report/:id", async (req, res) => {
 
     try {
         const sql = `select  extract( year from date_trunc('year', "Date")) as year, extract( month from date_trunc('month', "Date")) as month, count(salesinvoice_id) as transactions , sum(total_price) as revenue
-        FROM public.tbl_sales_invoice s
+        FROM public.tbl_sales_invoice 
         where pharmacy_id = $1
         group by date_trunc('month', "Date"),
         year

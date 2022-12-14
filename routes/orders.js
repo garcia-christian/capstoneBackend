@@ -147,6 +147,9 @@ const executeDeduct = async (id, pharmacy, qty) => {
     }
 }
 
+
+
+
 router.put("/confirmed-confirm/:id", async (req, res) => {
 
     try {
@@ -294,6 +297,32 @@ router.get("/get-order/:id", async (req, res) => {
      ;`;
         const rs = await pool.query(sql, [req.params.id]);
         res.json(rs.rows[0])
+    } catch (err) {
+        console.error(err.message);
+    }
+
+});
+
+router.post("/save-customer-meds/", async (req, res) => {
+
+    const { customer, local_med, qty } = req.body;
+
+
+
+
+    try {
+        const sql1 = `SELECT  global_med_id
+        FROM public.tbl_local_medicine
+        where med_id = $1`;
+        const rs1 = await pool.query(sql1, [local_med]);
+        const global_med = rs1.rows[0].global_med_id
+
+        const sql = `INSERT INTO public.tbl_customer_med(
+            customer, global_med, qty)
+            VALUES (?, ?, ?, ?);`;
+        const rs = await pool.query(sql, [customer, global_med, qty]);
+        res.json(rs)
+
     } catch (err) {
         console.error(err.message);
     }
