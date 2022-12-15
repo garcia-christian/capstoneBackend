@@ -317,10 +317,23 @@ router.post("/save-customer-meds/", async (req, res) => {
         const rs1 = await pool.query(sql1, [local_med]);
         const global_med = rs1.rows[0].global_med_id
 
-        const sql = `INSERT INTO public.tbl_customer_med(
-            customer, global_med, qty)
-            VALUES (?, ?, ?, ?);`;
-        const rs = await pool.query(sql, [customer, global_med, qty]);
+        const sql2 = `SELECT c_med_id, customer, global_med, qty
+        FROM public.tbl_customer_med
+        where customer = $1 and global_med = $2`;
+        const rs2 = await pool.query(sql2, [customer, global_med]);
+
+        if (rs2.rows.length === 0) {
+            const sql = `INSERT INTO public.tbl_customer_med(
+                customer, global_med, qty)
+                VALUES ($1, $2, $3);`;
+            const rs = await pool.query(sql, [customer, global_med, qty]);
+        } else {
+            const sql = `UPDATE public.tbl_customer_med
+            SET   qty= coalesce(qty, 0) + $2
+            WHERE c_med_id = $1;`;
+            const rs = await pool.query(sql, [rs2.rows[0].c_med_id, qty]);
+        }
+
         res.json(rs)
 
     } catch (err) {

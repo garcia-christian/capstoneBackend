@@ -34,11 +34,12 @@ router.post("/addrem", async (req, res) => {
         const { sun } = req.body;
         const { notes } = req.body;
         const { active } = req.body;
+        const { customer } = req.body;
 
-
-        const sql = `INSERT INTO public.tbl_rem(med_id, dose, mon, tue, wed, thu, fri, sat, sun, notes, active, updatetime)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP) returning *  `;
-        const rs = await pool.query(sql, [med_id, dose, mon, tue, wed, thu, fri, sat, sun, notes, active]);
+        const sql = `INSERT INTO public.tbl_rem(
+            med_id, dose, mon, tue, wed, thu, fri, sat, sun, notes, active, updatetime,  customer)
+           VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP, $12) returning *  `;
+        const rs = await pool.query(sql, [med_id, dose, mon, tue, wed, thu, fri, sat, sun, notes, active, customer]);
 
         res.json(rs.rows)
     } catch (err) {
@@ -101,28 +102,34 @@ router.get("/getmed", async (req, res) => {
 });
 
 router.get("/getmed/:id", async (req, res) => {
-    const { id } = req.params;
+
     try {
-        const sql = `SELECT *
-        FROM public."tbl_custMed" where custmed_id = $1;`;
-        const rs = await pool.query(sql, [id]);
+        const sql = `SELECT c_med_id, customer, global_brand_name as med_name, qty as med_quantity
+        FROM public.tbl_customer_med c
+        LEFT OUTER JOIN tbl_global_med g on g.global_med_id = c.global_med
+        where customer = $1
+        `;
+        const rs = await pool.query(sql, [req.params.id]);
         res.json(rs.rows)
     } catch (err) {
         console.error(err.message);
     }
 
-}); 
+});
 
 
-router.get("/getrem", async (req, res) => {
+router.get("/getrem/:id", async (req, res) => {
 
     try {
-        const sql = `SELECT r.*, m.med_name, m.med_quantity,(SELECT ARRAY_AGG(time) from tbl_time where rem_id = r.rem_id) as "rem_time"from tbl_rem r
-                    LEFT OUTER JOIN public."tbl_custMed" m ON m.custmed_id = r.med_id
+        const sql = `SELECT r.*, g.global_brand_name as med_name, m.qty as med_quantity,(SELECT ARRAY_AGG(time) from tbl_time where rem_id = r.rem_id) as "rem_time"from tbl_rem r
+        LEFT OUTER JOIN public."tbl_customer_med" m ON m.c_med_id = r.med_id
+        LEFT OUTER JOIN tbl_global_med g  ON g.global_med_id = m.global_med
+        where r.customer =$1
+
                            
         
         ;`;
-        const rs = await pool.query(sql);
+        const rs = await pool.query(sql, [req.params.id]);
         res.json(rs.rows)
     } catch (err) {
         console.error(err.message);
