@@ -282,7 +282,7 @@ router.get("/get-medicine-stock-status/:id", async (req, res) => {
         LEFT OUTER JOIN tbl_global_med g  ON g.global_med_id = m.global_med_id
         LEFT OUTER JOIN tbl_med_category c  ON g.global_med_category = c.med_cat_id
         WHERE m.pharmacy_id = $1 and m.med_qty <= coalesce(m.warning_threshold,0)
-        order by m.med_qty desc;`;
+        order by m.med_qty asc;`;
         const rs = await pool.query(sql, [req.params.id]);
         res.json(rs.rows)
     } catch (err) {

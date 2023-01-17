@@ -114,7 +114,6 @@ router.get("/getmed/:id", async (req, res) => {
     } catch (err) {
         console.error(err.message);
     }
-
 });
 
 

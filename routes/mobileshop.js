@@ -25,8 +25,8 @@ router.get("/get-pharmaproducts/:id", async (req, res) => {
             LEFT OUTER JOIN tbl_med_category c  ON g.global_med_category = c.med_cat_id
             LEFT OUTER JOIN "tbl_onSalesInvoice" s  ON s.med_id = m.med_id
             LEFT OUTER JOIN tbl_sales_invoice p  ON p.salesinvoice_id = s.sales_id
-             LEFT OUTER JOIN tbl_classification l  ON l.class_id = g.global_classification
-        WHERE m.pharmacy_id = $1
+            LEFT OUTER JOIN tbl_classification l  ON l.class_id = g.global_classification
+        WHERE m.pharmacy_id = $1 and m.med_qty > 0
         GROUP BY 
         m.med_id,
         m.global_med_id,
