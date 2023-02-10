@@ -7,8 +7,7 @@ router.post("/", async (req, res) => {
     try {
         const { admin } = req.body;
         const { pharmacy } = req.body;
-        //date
-        const { total_price } = req.body;//fix
+        const { total_price } = req.body;
         const { discount } = req.body;
         const { payed_ammount } = req.body;
         const { change } = req.body;
@@ -206,10 +205,10 @@ router.get("/this-year-report/:id", async (req, res) => {
     }
 
 });
-router.get("/get-sales/:id/:year/:month", async (req, res) => {
+router.get("/get-sales/:id/:start/:end", async (req, res) => {
 
     try {
-        if (req.params.year !== "0") {
+        if (req.params.start !== "0") {
             const sql = `SELECT s.salesinvoice_id,  
             s."Date",
             round(s.total_price::numeric, 2) as total_price , 
@@ -223,15 +222,13 @@ router.get("/get-sales/:id/:year/:month", async (req, res) => {
               public."tbl_discount" d  ON d.discount_id = s.discount
            LEFT OUTER JOIN
               public."tbl_onSalesInvoice" o  ON o.sales_id = s.salesinvoice_id
-             where s.pharmacy_id = $1
-             and extract( month from date_trunc('month', s."Date")) = $3
-             and  extract( year from date_trunc('year', s."Date")) = $2
-             GROUP BY
+             where s.pharmacy_id = $1 and s."Date" >= $2 and s."Date" <= $3
+			 GROUP BY
              s.salesinvoice_id,
              d.discount_desc
              ORDER BY s."Date" DESC`;
 
-            const rs = await pool.query(sql, [req.params.id, req.params.year, req.params.month]);
+            const rs = await pool.query(sql, [req.params.id, req.params.start, req.params.end]);
             res.json(rs.rows)
         } else {
             const sql = `SELECT s.salesinvoice_id,  

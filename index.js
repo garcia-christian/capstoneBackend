@@ -208,7 +208,7 @@ app.post("/assignAdmin", async (req, res) => {
 });
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5500;
 server.listen(PORT, () => {
     console.log(`Server started as localhost at Port: ${PORT}`)
 })
