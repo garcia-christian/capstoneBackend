@@ -208,7 +208,7 @@ router.get("/this-year-report/:id", async (req, res) => {
 router.get("/get-sales/:id/:start/:end", async (req, res) => {
 
     try {
-        if (req.params.start !== "0") {
+        if (req.params.start !== "0" && req.params.end !== "0") {
             const sql = `SELECT s.salesinvoice_id,  
             s."Date",
             round(s.total_price::numeric, 2) as total_price , 
