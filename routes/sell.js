@@ -205,6 +205,62 @@ router.get("/this-year-report/:id", async (req, res) => {
     }
 
 });
+router.get("/get-msales/:id/:year/:month", async (req, res) => {
+
+    try {
+        if (req.params.year !== "0") {
+            const sql = `SELECT s.salesinvoice_id,  
+            s."Date",
+            round(s.total_price::numeric, 2) as total_price , 
+            d.discount_desc, round(s.payed_ammount::numeric, 2) as payed_ammount, 
+            round(s.change::numeric, 2) as change,
+            count(o.*) as items
+         
+         FROM  public.tbl_sales_invoice s
+         
+           LEFT OUTER JOIN
+              public."tbl_discount" d  ON d.discount_id = s.discount
+           LEFT OUTER JOIN
+              public."tbl_onSalesInvoice" o  ON o.sales_id = s.salesinvoice_id
+             where s.pharmacy_id = $1
+             and extract( month from date_trunc('month', s."Date")) = $3
+             and  extract( year from date_trunc('year', s."Date")) = $2
+             GROUP BY
+             s.salesinvoice_id,
+             d.discount_desc
+             ORDER BY s."Date" DESC`;
+
+            const rs = await pool.query(sql, [req.params.id, req.params.year, req.params.month]);
+            res.json(rs.rows)
+        } else {
+            const sql = `SELECT s.salesinvoice_id,  
+            s."Date",
+            round(s.total_price::numeric, 2) as total_price , 
+            d.discount_desc, round(s.payed_ammount::numeric, 2) as payed_ammount, 
+            round(s.change::numeric, 2) as change,
+            count(o.*) as items
+         
+         FROM  public.tbl_sales_invoice s
+         
+           LEFT OUTER JOIN
+              public."tbl_discount" d  ON d.discount_id = s.discount
+           LEFT OUTER JOIN
+              public."tbl_onSalesInvoice" o  ON o.sales_id = s.salesinvoice_id
+             where s.pharmacy_id = $1
+             GROUP BY
+             s.salesinvoice_id,
+             d.discount_desc
+             ORDER BY s."Date" DESC`;
+
+            const rs = await pool.query(sql, [req.params.id]);
+            res.json(rs.rows)
+        }
+
+    } catch (err) {
+        console.error(err.message);
+    }
+
+});
 router.get("/get-sales/:id/:start/:end", async (req, res) => {
 
     try {
