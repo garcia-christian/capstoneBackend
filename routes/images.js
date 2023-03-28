@@ -14,15 +14,7 @@ router.get("/file/:path", async (req, res) => {
     }
 
 });
-router.get("/file/:path", async (req, res) => {
 
-    try {
-        res.download("./css/" + req.params.path)
-    } catch (err) {
-        console.error(err.message);
-    }
-
-});
 
 
 module.exports = router;
