@@ -14,7 +14,7 @@ router.get("/file/:path", async (req, res) => {
     }
 
 });
-router.get("/css/:path", async (req, res) => {
+router.get("/file/:path", async (req, res) => {
 
     try {
         res.download("./css/" + req.params.path)
